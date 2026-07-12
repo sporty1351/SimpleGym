@@ -45,7 +45,7 @@ public class TrainingActivity extends AppCompatActivity {
 
             Toast.makeText(
                     this,
-                    lastTraining.text,
+                    lastTraining.notes,
                     Toast.LENGTH_SHORT
             ).show();
         });
