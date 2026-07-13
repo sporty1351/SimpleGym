@@ -1,5 +1,6 @@
 package com.example.simplegym;
 
+import java.util.List;
 import android.widget.TextView;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,6 +19,8 @@ import androidx.core.view.WindowInsetsCompat;
 public class TrainingActivity extends AppCompatActivity {
     // Менеджер фоновых задач — один поток, выполняющий задачи по очереди
     private final ExecutorService databaseExecutor = Executors.newSingleThreadExecutor();
+
+    private Training currentTraining = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,20 +41,38 @@ public class TrainingActivity extends AppCompatActivity {
 
         Button saveButton = findViewById(R.id.saveButton); // поиск в xml кнопки
 
-        saveButton.setOnClickListener(v -> {
-            // Собираем объект тренировки из введённых данных
-            String notesText = trainingText.getText().toString();
-            Training training = new Training(date, notesText);
-
-            // Отправляем задачу "сохранить в базу" грузчику (фоновый поток)
-            databaseExecutor.execute(() -> {
-                trainingDao.insert(training);
+        databaseExecutor.execute(() -> {
+            List<Training> existing = trainingDao.getTrainingsByDate(date);
+            runOnUiThread(() -> {
+                if (!existing.isEmpty()) {
+                    currentTraining = existing.get(0);        // берём заметку за этот день
+                    trainingText.setText(currentTraining.notes); // показываем её текст в поле
+                }
             });
-
-            // Сообщаем пользователю (это уже в главном потоке — можно трогать интерфейс)
-            Toast.makeText(this, "Тренировка сохранена!", Toast.LENGTH_SHORT).show();
         });
 
+        saveButton.setOnClickListener(v -> {
+            String notesText = trainingText.getText().toString();
+
+            databaseExecutor.execute(() -> {
+                if (currentTraining == null) {
+                    // заметки ещё не было — создаём новую
+                    Training training = new Training(date, notesText);
+                    trainingDao.insert(training);
+                    // перечитываем, чтобы получить объект с настоящим id из базы
+                    List<Training> saved = trainingDao.getTrainingsByDate(date);
+                    if (!saved.isEmpty()) {
+                        currentTraining = saved.get(0);
+                    }
+                } else {
+                    // заметка уже была — обновляем её текст
+                    currentTraining.notes = notesText;
+                    trainingDao.update(currentTraining);
+                }
+            });
+
+            Toast.makeText(this, "Сохранено!", Toast.LENGTH_SHORT).show();
+        });
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);

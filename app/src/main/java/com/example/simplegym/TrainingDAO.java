@@ -1,5 +1,6 @@
 package com.example.simplegym;
 
+import androidx.room.Update;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -10,6 +11,8 @@ import java.util.List;
 @Dao
 public interface TrainingDAO {
 
+    @Update
+    void update(Training training);
     @Insert
     void insert(Training training);
 
