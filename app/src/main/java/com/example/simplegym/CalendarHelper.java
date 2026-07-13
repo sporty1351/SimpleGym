@@ -1,5 +1,7 @@
 package com.example.simplegym;
 
+import java.util.Locale;
+import java.util.Calendar;
 import android.content.Context;
 import android.view.Gravity;
 import android.widget.Button;
@@ -66,12 +68,19 @@ public class CalendarHelper {
 
             button.setOnClickListener(v -> {
 
+                Calendar calendar = Calendar.getInstance();
+
+                String fullDate = String.format(
+                        Locale.US,
+                        "%02d.%02d.%04d",
+                        currentDay,
+                        calendar.get(Calendar.MONTH) + 1,
+                        calendar.get(Calendar.YEAR)
+                );
+
                 Intent intent = new Intent(context, TrainingActivity.class);
-
-                intent.putExtra("date", String.valueOf(currentDay));
-
+                intent.putExtra("date", fullDate);
                 context.startActivity(intent);
-
             });
 
 
