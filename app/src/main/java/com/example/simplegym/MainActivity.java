@@ -32,11 +32,6 @@ public class MainActivity extends AppCompatActivity {
         GridLayout calendarGrid = findViewById(R.id.calendarGrid); //Создаем календарь
         CalendarHelper.createCalendar(this, calendarGrid);
 
-        Button openTrainingButton = findViewById(R.id.openTrainingButton);
-        openTrainingButton.setOnClickListener(v -> {
-            Intent intent = new Intent(this, TrainingActivity.class);
-            startActivity(intent);
-        });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
