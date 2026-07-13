@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+
+    <color name="bg_dark">#1A1D21</color>
+    <color name="cell_dark">#24282E</color>
+    <color name="accent_orange">#FF6A2B</color>
+    <color name="text_light">#C8CCD2</color>
+    <color name="text_muted">#5F646D</color>
+    <color name="white">#FFFFFF</color>
+
 </resources>
