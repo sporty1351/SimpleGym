@@ -1,5 +1,6 @@
 package com.example.simplegym;
 
+import android.view.View;
 import java.util.Locale;
 import java.util.Calendar;
 import android.content.Context;
@@ -40,9 +41,28 @@ public class CalendarHelper {
 
             calendarGrid.addView(textView);
         }
+        Calendar calendar = Calendar.getInstance();
+        int currentMonth = calendar.get(Calendar.MONTH) + 1;
+        int currentYear = calendar.get(Calendar.YEAR);
+
+        int daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        int firstDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        int emptyCells = (firstDayOfWeek + 5) % 7;
+
+        for (int i = 0; i < emptyCells; i++) {
+            View emptyView = new View(context);
+            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+            params.width = 0;
+            params.height = 130;
+            params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+            emptyView.setLayoutParams(params);
+            calendarGrid.addView(emptyView);
+        }
 
         // кнопки с датами
-        for (int day = 1; day <= 31; day++) {
+        for (int day = 1; day <= daysInMonth; day++) {
             int currentDay = day;
 
             Button button = new Button(context);
@@ -59,13 +79,12 @@ public class CalendarHelper {
             button.setLayoutParams(params);
 
             button.setOnClickListener(v -> {
-                Calendar calendar = Calendar.getInstance();
                 String fullDate = String.format(
                         Locale.US,
                         "%02d.%02d.%04d",
                         currentDay,
-                        calendar.get(Calendar.MONTH) + 1,
-                        calendar.get(Calendar.YEAR)
+                        currentMonth,
+                        currentYear
                 );
                 Intent intent = new Intent(context, TrainingActivity.class);
                 intent.putExtra("date", fullDate);
