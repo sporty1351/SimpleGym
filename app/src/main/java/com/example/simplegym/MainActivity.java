@@ -8,13 +8,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 public class MainActivity extends AppCompatActivity {
-    private final ExecutorService databaseExecutor = Executors.newSingleThreadExecutor();
 
+    private TrainingRepository repository;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState); // создание экрана
@@ -23,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main); // сопряжение java с xml
 
-
+        repository = new TrainingRepository(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -40,18 +38,10 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         loadCalendar();
     }
-
     private void loadCalendar() {
         GridLayout calendarGrid = findViewById(R.id.calendarGrid);
-        AppDatabase db = AppDatabase.getDatabase(this);
-        TrainingDAO trainingDao = db.trainingDao();
-
-        databaseExecutor.execute(() -> {
-            List<String> filledDates = trainingDao.getAllDates();
-            runOnUiThread(() -> {
-                CalendarHelper.createCalendar(this, calendarGrid, filledDates);
-            });
-        });
+        repository.getAllDates(filledDates ->
+                CalendarHelper.createCalendar(this, calendarGrid, filledDates));
     }
 
 }

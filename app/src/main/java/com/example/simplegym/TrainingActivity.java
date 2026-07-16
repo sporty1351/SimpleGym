@@ -1,9 +1,6 @@
 package com.example.simplegym;
 
-import java.util.List;
 import android.widget.TextView;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,8 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class TrainingActivity extends AppCompatActivity {
     // Менеджер фоновых задач — один поток, выполняющий задачи по очереди
-    private final ExecutorService databaseExecutor = Executors.newSingleThreadExecutor();
-
+    private TrainingRepository repository;
     private Training currentTraining = null;
 
     @Override
@@ -29,50 +25,45 @@ public class TrainingActivity extends AppCompatActivity {
         EdgeToEdge.enable(this); // наложение системного времени и полей
 
         setContentView(R.layout.activity_training_activity); // сопряжение java с xml
+        repository = new TrainingRepository(this);
         String date = getIntent().getStringExtra("date");
 
         TextView dateTitle = findViewById(R.id.dateTitle);
         dateTitle.setText(formatDateNicely(date));
 
-        AppDatabase db = AppDatabase.getDatabase(this);
-        TrainingDAO trainingDao = db.trainingDao();
 
         EditText trainingText = findViewById(R.id.trainingText); // поиск в xml trainingtext
 
         Button saveButton = findViewById(R.id.saveButton); // поиск в xml кнопки
 
-        databaseExecutor.execute(() -> {
-            List<Training> existing = trainingDao.getTrainingsByDate(date);
-            runOnUiThread(() -> {
-                if (!existing.isEmpty()) {
-                    currentTraining = existing.get(0);        // берём заметку за этот день
-                    trainingText.setText(currentTraining.notes); // показываем её текст в поле
-                }
-            });
+        repository.getTrainingByDate(date, training -> {
+            if (training != null) {
+                currentTraining = training;
+                trainingText.setText(training.notes);
+            }
         });
 
         saveButton.setOnClickListener(v -> {
-            String notesText = trainingText.getText().toString();
+            String notesText = trainingText.getText().toString().trim();
 
-            databaseExecutor.execute(() -> {
-                if (currentTraining == null) {
-                    // заметки ещё не было — создаём новую
-                    Training training = new Training(date, notesText);
-                    trainingDao.insert(training);
-                    // перечитываем, чтобы получить объект с настоящим id из базы
-                    List<Training> saved = trainingDao.getTrainingsByDate(date);
-                    if (!saved.isEmpty()) {
-                        currentTraining = saved.get(0);
-                    }
-                } else {
-                    // заметка уже была — обновляем её текст
-                    currentTraining.notes = notesText;
-                    trainingDao.update(currentTraining);
+            if (notesText.isEmpty()) {
+                if (currentTraining != null) {
+                    repository.delete(currentTraining, result -> currentTraining = null);
+                    Toast.makeText(this, "Запись удалена", Toast.LENGTH_SHORT).show();
                 }
-            });
+                return;
+            }
 
+            if (currentTraining == null) {
+                currentTraining = new Training(date, notesText);
+            } else {
+                currentTraining.notes = notesText;
+            }
+
+            repository.save(currentTraining, date, saved -> currentTraining = saved);
             Toast.makeText(this, "Сохранено!", Toast.LENGTH_SHORT).show();
         });
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
