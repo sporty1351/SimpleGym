@@ -1,24 +1,19 @@
 package com.example.simplegym;
 
-import android.view.Gravity;
-import android.widget.TextView;
-import android.widget.GridLayout;
-import android.content.Intent;
-import android.os.Bundle;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
+import android.widget.GridLayout;
+import android.os.Bundle;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
-import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
-    ArrayList<Training> trainings = new ArrayList<>();
-    Training currentTraining;
+    private final ExecutorService databaseExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +23,6 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main); // сопряжение java с xml
 
-
-        GridLayout calendarGrid = findViewById(R.id.calendarGrid); //Создаем календарь
-        CalendarHelper.createCalendar(this, calendarGrid);
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -43,4 +35,23 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadCalendar();
+    }
+
+    private void loadCalendar() {
+        GridLayout calendarGrid = findViewById(R.id.calendarGrid);
+        AppDatabase db = AppDatabase.getDatabase(this);
+        TrainingDAO trainingDao = db.trainingDao();
+
+        databaseExecutor.execute(() -> {
+            List<String> filledDates = trainingDao.getAllDates();
+            runOnUiThread(() -> {
+                CalendarHelper.createCalendar(this, calendarGrid, filledDates);
+            });
+        });
+    }
+
 }

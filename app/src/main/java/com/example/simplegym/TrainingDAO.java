@@ -5,12 +5,12 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Delete;
-
 import java.util.List;
 
 @Dao
 public interface TrainingDAO {
-
+    @Query("SELECT date FROM trainings")
+    List<String> getAllDates();
     @Update
     void update(Training training);
     @Insert

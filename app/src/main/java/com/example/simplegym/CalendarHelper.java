@@ -5,14 +5,15 @@ import java.util.Locale;
 import java.util.Calendar;
 import android.content.Context;
 import android.view.Gravity;
-import android.widget.Button;
+import androidx.appcompat.widget.AppCompatButton;
 import android.widget.GridLayout;
 import android.widget.TextView;
 import android.content.Intent;
 import androidx.core.content.ContextCompat;
+import java.util.List;
 public class CalendarHelper {
 
-    public static void createCalendar(Context context, GridLayout calendarGrid) {
+    public static void createCalendar(Context context, GridLayout calendarGrid, List<String> filledDates) {
 
         String[] weekDays = {
                 "Пн",
@@ -24,7 +25,7 @@ public class CalendarHelper {
                 "Вс"
         };
 
-
+        calendarGrid.removeAllViews();
         // Создаем названия дней недели
         for (String weekDay : weekDays) {
             TextView textView = new TextView(context);
@@ -65,10 +66,16 @@ public class CalendarHelper {
         for (int day = 1; day <= daysInMonth; day++) {
             int currentDay = day;
 
-            Button button = new Button(context);
+            AppCompatButton button = new AppCompatButton(context);
             button.setText(String.valueOf(day));
             button.setTextColor(ContextCompat.getColor(context, R.color.text_light));
             button.setBackgroundResource(R.drawable.day_button);
+            String dayDate = String.format(Locale.US, "%02d.%02d.%04d", day, currentMonth, currentYear);
+            if (filledDates.contains(dayDate)) {
+                button.setBackgroundResource(R.drawable.day_button_accent);
+                button.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.accent_orange));
+                button.setTextColor(ContextCompat.getColor(context, R.color.white));
+            }
             button.setPadding(0, 0, 0, 0);
 
             GridLayout.LayoutParams params = new GridLayout.LayoutParams();
