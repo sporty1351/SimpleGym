@@ -9,11 +9,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private TrainingRepository repository;
+    private GestureDetector gestureDetector;
     private final Calendar displayedMonth = Calendar.getInstance();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +40,23 @@ public class MainActivity extends AppCompatActivity {
             loadCalendar();
         });
 
+        gestureDetector = new GestureDetector(this,
+                new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                        float diffX = e2.getX() - e1.getX();
+                        if (Math.abs(diffX) > 100 && Math.abs(velocityX) > 100) {
+                            if (diffX < 0) {
+                                displayedMonth.add(Calendar.MONTH, 1);
+                            } else {
+                                displayedMonth.add(Calendar.MONTH, -1);
+                            }
+                            loadCalendar();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(
@@ -69,6 +89,11 @@ public class MainActivity extends AppCompatActivity {
         int month = calendar.get(Calendar.MONTH);
         int year = calendar.get(Calendar.YEAR);
         return months[month] + " " + year;
+    }
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        gestureDetector.onTouchEvent(event);
+        return super.dispatchTouchEvent(event);
     }
 
 }
