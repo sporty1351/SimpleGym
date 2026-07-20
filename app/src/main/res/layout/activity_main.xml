@@ -12,24 +12,39 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingBottom="16dp">
+        android:paddingBottom="16dp"
+        android:gravity="center_vertical">
 
         <TextView
+            android:id="@+id/prevMonth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="‹"
+            android:textColor="@color/white"
+            android:textSize="28sp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp" />
+
+        <TextView
+            android:id="@+id/monthTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:gravity="center"
             android:text="Июль 2026"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/nextMonth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Мой дневник"
-            android:textColor="@color/text_muted"
-            android:textSize="13sp"
-            android:layout_gravity="center_vertical" />
+            android:text="›"
+            android:textColor="@color/white"
+            android:textSize="28sp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp" />
 
     </LinearLayout>
 

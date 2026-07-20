@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat;
 import java.util.List;
 public class CalendarHelper {
 
-    public static void createCalendar(Context context, GridLayout calendarGrid, List<String> filledDates) {
+    public static void createCalendar(Context context, GridLayout calendarGrid, List<String> filledDates, Calendar displayedMonth) {
 
         String[] weekDays = {
                 "Пн",
@@ -42,7 +42,7 @@ public class CalendarHelper {
 
             calendarGrid.addView(textView);
         }
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = (Calendar) displayedMonth.clone();
         int currentMonth = calendar.get(Calendar.MONTH) + 1;
         int currentYear = calendar.get(Calendar.YEAR);
 
